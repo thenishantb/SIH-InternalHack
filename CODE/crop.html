@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Model for Indian Crops</title>
+    <style>
+        body {
+            font-family: sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #f0f2f5;
+        }
+        .container {
+            width: 90%;
+            max-width: 600px;
+            padding: 2em;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+        textarea {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 15px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            resize: vertical;
+            font-size: 16px;
+        }
+        button {
+            padding: 10px 20px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        #aiOutput {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #e9ecef;
+            border-radius: 4px;
+            text-align: left;
+            white-space: pre-wrap;
+        }
+        #aiOutput.loading {
+            color: #6c757d;
+            font-style: italic;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>AI Model for Indian Crops</h1>
+        <textarea id="userInput" placeholder="e.g., Which crops grow in the rabi season on alluvial soil?" rows="3"></textarea>
+        <button id="submitBtn">Get Answer</button>
+        <div id="aiOutput"></div>
+    </div>
+
+    <script>
+        // The integrated, comprehensive dataset
+        const indianCropsData = [
+            { "Season": "Kharif", "Crop": "Rice", "Soil": "Alluvial" },
+            { "Season": "Kharif", "Crop": "Maize", "Soil": "Red" },
+            { "Season": "Kharif", "Crop": "Soybean", "Soil": "Black" },
+            { "Season": "Kharif", "Crop": "Cotton", "Soil": "Black" },
+            { "Season": "Kharif", "Crop": "Groundnut", "Soil": "Sandy" },
+            { "Season": "Kharif", "Crop": "Sugarcane", "Soil": "Alluvial" },
+            { "Season": "Rabi", "Crop": "Wheat", "Soil": "Alluvial" },
+            { "Season": "Rabi", "Crop": "Barley", "Soil": "Sandy" },
+            { "Season": "Rabi", "Crop": "Gram", "Soil": "Black" },
+            { "Season": "Rabi", "Crop": "Mustard", "Soil": "Alluvial" },
+            { "Season": "Rabi", "Crop": "Lentil", "Soil": "Alluvial" },
+            { "Season": "Rabi", "Crop": "Potato", "Soil": "Loamy" },
+            { "Season": "Zaid", "Crop": "Watermelon", "Soil": "Sandy" },
+            { "Season": "Zaid", "Crop": "Cucumber", "Soil": "Sandy" },
+            { "Season": "Zaid", "Crop": "Muskmelon", "Soil": "Sandy" }
+        ];
+
+        // The AI Query System Logic - an example of a simple rule-based model
+        const submitBtn = document.getElementById('submitBtn');
+        const userInput = document.getElementById('userInput');
+        const aiOutput = document.getElementById('aiOutput');
+
+        async function getAIResponse(query) {
+            const normalizedQuery = query.toLowerCase().trim();
+            const keywords = normalizedQuery.split(/\s+/); // Splits query into words
+
+            // Find matching seasons and soil types in the query
+            const seasonKeyword = keywords.find(word => ["kharif", "rabi", "zaid"].includes(word));
+            const soilKeyword = keywords.find(word => ["alluvial", "red", "black", "sandy", "loamy"].includes(word));
+
+            return new Promise(resolve => {
+                setTimeout(() => {
+                    let filteredCrops = indianCropsData;
+                    
+                    if (seasonKeyword) {
+                        filteredCrops = filteredCrops.filter(item => item.Season.toLowerCase() === seasonKeyword);
+                    }
+                    if (soilKeyword) {
+                        filteredCrops = filteredCrops.filter(item => item.Soil.toLowerCase() === soilKeyword);
+                    }
+
+                    if (filteredCrops.length > 0) {
+                        const cropNames = filteredCrops.map(item => item.Crop);
+                        let responseText = "Based on your query, the following crops are a good match: ";
+                        responseText += cropNames.join(", ") + ".";
+                        resolve(responseText);
+                    } else if (seasonKeyword || soilKeyword) {
+                        resolve("I found the season/soil you mentioned, but there are no matching crops in my dataset.");
+                    } else {
+                        resolve("I'm sorry, I couldn't understand the query. Please mention a season (Kharif, Rabi, Zaid) or a soil type (Alluvial, Red, Black, Sandy, Loamy).");
+                    }
+                }, 1000); // Simulate processing delay
+            });
+        }
+        
+        submitBtn.addEventListener('click', async () => {
+            const query = userInput.value;
+            
+            if (query.trim() === "") {
+                aiOutput.textContent = "Please enter a query.";
+                aiOutput.className = "";
+                return;
+            }
+
+            aiOutput.textContent = "Thinking...";
+            aiOutput.className = "loading";
+
+            try {
+                const response = await getAIResponse(query);
+                aiOutput.textContent = response;
+                aiOutput.className = "";
+            } catch (error) {
+                console.error("Error:", error);
+                aiOutput.textContent = "An error occurred. Please try again.";
+                aiOutput.className = "";
+            }
+        });
+    </script>
+</body>
+</html>
