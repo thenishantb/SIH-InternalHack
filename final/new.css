@@ -5,6 +5,7 @@ body {
 }
 .main{
     display: flex;
+    justify-content: space-evenly;
     padding: 0;
     flex: 1;
     height: 100vh;
