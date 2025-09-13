@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Krishi Sahayak</title>
+    <link rel="icon" href="logo.png">
+    <link rel="stylesheet" href="new.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css" integrity="sha512-2SwdPD6INVrV/lHTZbO2nodKhrnDdJK9/kg2XD1r9uGqPo1cUbujc+IYdlYdEErWNu69gVcYgdxlmVmzTWnetw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+   <link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@200..800&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="navbar">
+        <img src="logo002.PNG" alt="KRISHI SAHAYAK" id="mainlogo">
+        <h1 id="title">KRISHI SAHAYAK</h1>
+        <div id="navbuttons">
+            <i class="fa-solid fa-circle-user" id="userlogin"> </i>
+        </div>
+    </div>
+    <div class="main">
+        <div class="container">
+            <img src="logo002.PNG" alt="KRISHI SAHAYAK" id="contimg">
+    <h1>KRISHI SAHAYAK</h1>
+    <p style="color:#666;margin-bottom:15px;">Ask any agricultural question and get AI-powered answers!</p>
+
+    <!-- Language selection -->
+    <label for="lang-select">Choose Language:</label>
+    <select id="lang-select">
+      <option value="en-IN" selected>English</option>
+      <option value="te-IN">Telugu</option>
+      <option value="hi-IN">Hindi</option>
+      <option value="ml-IN">Malayalam</option>
+      <option value="ta-IN">Tamil</option>
+      <option value="kn-IN">Kannada</option>
+      <option value="mr-IN">Marathi</option>
+    </select>
+
+    <div class="controls">
+      <input type="text" id="user-input" placeholder="Ask your agricultural question in any language..." onkeypress="handleKeyPress(event)">
+      <button id="mic-btn" class="icon-btn">🎤</button>
+    </div>
+    <button onclick="sendQuery()">Submit</button>
+
+    <div id="response-container">
+      <button class="speaker-button" id="pause-btn">⏸️</button>
+      <button class="speaker-button" id="stop-btn">⏹️</button>
+    </div>
+  </div>
+
+
+    </div>
+
+    <div class="endbar">
+        <p style="text-align: center; ">"Designed and developed by "Team 404 not found" for SIH Internal hackathon at SR University</p>
+        <a href="" id="Git" style="color: white; text-decoration: underline;">Github Repository</a>
+    </div>
+    <script src="new.js"></script>
+</body>
+</html>

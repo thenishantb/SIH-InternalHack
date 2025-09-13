@@ -1,0 +1,166 @@
+body {
+    margin: 0;
+    padding: 0;
+
+}
+.main{
+    display: flex;
+    padding: 0;
+    flex: 1;
+    height: 100vh;
+    background-color: #afee1137;
+    overflow:auto;
+}
+.navbar {
+    display: flex;
+    top: 0;
+    width: 100%;
+    z-index: 5;
+    background-color:#89eb1145;
+    justify-content: space-between;
+}
+
+#mainlogo {
+    width: 6rem;
+    height: 5rem;
+    top: 0;         
+    left: 0;
+}
+#navbuttons{
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+
+}
+#userlogin{
+    display: flex;
+    top: 5;
+    font-size: 2rem;
+    
+}
+#title{  
+  font-family: "Manrope", sans-serif;
+  font-optical-sizing: auto;
+  font-weight: 600;
+  font-style: normal;
+
+}
+#userlogin:hover{
+    translate: 0 -10px;
+
+}
+.endbar{
+    background-color: black;
+    height: 12vh;
+    width: 100%;
+    bottom: 0;
+    color: white;
+    display: flex;
+    flex-direction: column;  
+    justify-content: center;  
+    align-items: center;
+}
+
+
+.container {
+      margin-left: 20%;
+      margin-right: 20%;
+      margin-bottom: 10%;
+      margin-top: 4%;
+      width: 90%;
+      max-width: 700px;
+      padding: 2em;
+      background-color: #ffffff;
+      border-radius: 12px;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.1);
+      height: 50rem;
+      text-align: center;
+      background-color: #44ee1130 ;
+      
+    }
+    h1 { color: #333; margin-bottom: 1em; }
+    .controls {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 15px;
+    }
+    input[type="text"] {
+      flex: 1;
+      padding: 12px;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      font-size: 16px;
+      box-sizing: border-box;
+    }
+    button {
+      padding: 12px 18px;
+      background-color: #007bff;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 16px;
+      transition: background-color 0.3s ease;
+    }
+    button:hover { background-color: #0056b3; }
+    .icon-btn { width: 46px; }
+    #response-container {
+      margin-top: 25px;
+      padding: 20px;
+      background-color: #e9ecef;
+      border: 1px solid #dee2e6;
+      border-radius: 8px;
+      text-align: left;
+      white-space: pre-wrap;
+      line-height: 1.6;
+      color: #495057;
+      min-height: 100px;
+      box-shadow: inset 0 1px 3px rgba(0,0,0,0.05);
+      position: relative;
+    }
+    #response-container.loading {
+      color: #6c757d;
+      font-style: italic;
+      text-align: center;
+    }
+    .speaker-button {
+      position: absolute;
+      top: 8px;
+      border: none;
+      color: white;
+      font-size: 20px;
+      cursor: pointer;
+      border-radius: 50%;
+      width: 40px;
+      height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background-color 0.3s ease;
+    }
+    #pause-btn { right: 55px; background: #f39c12; }
+    #pause-btn:hover { background: #d68910; }
+    #stop-btn { right: 100px; background: #e74c3c; }
+    #stop-btn:hover { background: #c0392b; }
+    select {
+      padding: 8px;
+      border-radius: 6px;
+      margin-bottom: 15px;
+      font-size: 15px;
+    }
+    .mic-active { background-color: #dc3545 !important; }
+
+#contimg{
+    width: 9rem;
+    height: 8rem;
+
+}
+#user-input{
+    border-radius: 30%;
+    background-color:#ffffff6e;
+ ;
+}
+#lang-select{
+    background-color: rgba(145, 50, 50, 0.349);
+    border-radius: 20%;
+}
