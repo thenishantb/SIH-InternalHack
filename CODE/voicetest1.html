@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>KRISHI SAHAYAK</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      margin: 0;
+      background-color: #f4f4f9;
+    }
+    .container {
+      width: 90%;
+      max-width: 700px;
+      padding: 2em;
+      background-color: #ffffff;
+      border-radius: 12px;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.1);
+      text-align: center;
+    }
+    h1 { color: #333; margin-bottom: 1em; }
+    .controls {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 15px;
+    }
+    input[type="text"] {
+      flex: 1;
+      padding: 12px;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      font-size: 16px;
+      box-sizing: border-box;
+    }
+    button {
+      padding: 12px 18px;
+      background-color: #007bff;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 16px;
+      transition: background-color 0.3s ease;
+    }
+    button:hover { background-color: #0056b3; }
+    .icon-btn { width: 46px; }
+    #response-container {
+      margin-top: 25px;
+      padding: 20px;
+      background-color: #e9ecef;
+      border: 1px solid #dee2e6;
+      border-radius: 8px;
+      text-align: left;
+      white-space: pre-wrap;
+      line-height: 1.6;
+      color: #495057;
+      min-height: 100px;
+      box-shadow: inset 0 1px 3px rgba(0,0,0,0.05);
+      position: relative;
+    }
+    #response-container.loading {
+      color: #6c757d;
+      font-style: italic;
+      text-align: center;
+    }
+    .speaker-button {
+      position: absolute;
+      top: 8px;
+      right: 8px;
+      background: #3498db;
+      border: none;
+      color: white;
+      font-size: 20px;
+      cursor: pointer;
+      border-radius: 50%;
+      width: 40px;
+      height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background-color 0.3s ease;
+    }
+    .speaker-button:hover {
+      background: #2980b9;
+    }
+    select {
+      padding: 8px;
+      border-radius: 6px;
+      margin-bottom: 15px;
+      font-size: 15px;
+    }
+    .mic-active { background-color: #dc3545 !important; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>KRISHI SAHAYAK</h1>
+    <p style="color:#666;margin-bottom:15px;">Ask any agricultural question and get AI-powered answers!</p>
+
+    <!-- Language selection -->
+    <label for="lang-select">Choose Language:</label><br>
+    <select id="lang-select">
+      <option value="en-IN" selected>English</option>
+      <option value="te-IN">Telugu</option>
+      <option value="hi-IN">Hindi</option>
+      <option value="ml-IN">Malayalam</option>
+      <option value="ta-IN">Tamil</option>
+      <option value="kn-IN">Kannada</option>
+      <option value="mr-IN">Marathi</option>
+    </select>
+
+    <div class="controls">
+      <input type="text" id="user-input" placeholder="Ask your agricultural question in any language..." onkeypress="handleKeyPress(event)">
+      <button id="mic-btn" class="icon-btn">🎤</button>
+    </div>
+    <button onclick="sendQuery()">Submit</button>
+    
+    <!-- Auto-speak option -->
+    <div style="margin-top: 10px;">
+      <label>
+        <input type="checkbox" id="auto-speak" checked> 
+        🔊 Auto-speak responses
+      </label>
+      <button id="test-voice-btn" style="margin-left: 10px; background-color: #28a745; font-size: 12px; padding: 5px 10px;">Test Voice</button>
+    </div>
+
+    <div id="response-container">
+      <button class="speaker-button" id="speak-btn">🔊</button>
+    </div>
+  </div>
+
+<script>
+const apiKey = "AIzaSyA2RwJNXQvk8yjA0CBsYXBaeVyq5IkVf3w"; // <-- Replace with your Gemini API key
+const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${apiKey}`;
+
+const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+const recognition = SpeechRecognition ? new SpeechRecognition() : null;
+const synth = window.speechSynthesis;
+
+// Enter key support
+function handleKeyPress(event) {
+  if (event.key === 'Enter') {
+    sendQuery();
+  }
+}
+
+// Voice test functionality
+document.addEventListener('DOMContentLoaded', () => {
+  document.getElementById('test-voice-btn').onclick = () => {
+    testVoiceSynthesis();
+  };
+  
+  // Ensure voices are loaded
+  if (synth) {
+    synth.onvoiceschanged = () => {
+      console.log('Voices loaded:', synth.getVoices().length);
+    };
+  }
+});
+
+// Test voice synthesis
+function testVoiceSynthesis() {
+  const lang = document.getElementById('lang-select').value;
+  const testText = getTestText(lang);
+  
+  console.log('Testing voice synthesis for language:', lang);
+  speakText(testText);
+}
+
+// Get test text for different languages
+function getTestText(lang) {
+  const testTexts = {
+    'en-IN': 'Hello! This is a test of the voice synthesis system.',
+    'te-IN': 'నమస్కారం! ఇది వాయిస్ సింథసిస్ సిస్టమ్ యొక్క పరీక్ష.',
+    'ta-IN': 'வணக்கம்! இது குரல் தொகுப்பு அமைப்பின் சோதனை.',
+    'kn-IN': 'ನಮಸ್ಕಾರ! ಇದು ಧ್ವನಿ ಸಂಶ್ಲೇಷಣೆ ವ್ಯವಸ್ಥೆಯ ಪರೀಕ್ಷೆ.',
+    'ml-IN': 'നമസ്കാരം! ഇത് വോയ്സ് സിന്തസിസ് സിസ്റ്റത്തിന്റെ പരീക്ഷണമാണ്.',
+    'hi-IN': 'नमस्ते! यह वॉयस सिंथेसिस सिस्टम का परीक्षण है।',
+    'mr-IN': 'नमस्कार! हे व्हॉइस सिंथेसिस सिस्टमचे चाचणी आहे.'
+  };
+  
+  return testTexts[lang] || testTexts['en-IN'];
+}
+
+// 🎤 Microphone input
+if (recognition) {
+  recognition.continuous = false;
+  recognition.interimResults = false;
+  recognition.onresult = e => {
+    document.getElementById('user-input').value = e.results[0][0].transcript;
+    sendQuery();
+  };
+  recognition.onerror = e => console.error('Speech error:', e.error);
+  recognition.onend = () => document.getElementById('mic-btn').classList.remove('mic-active');
+}
+
+document.getElementById('mic-btn').onclick = () => {
+  if (!recognition) { alert("Speech recognition not supported"); return; }
+  const lang = document.getElementById('lang-select').value;
+  recognition.lang = lang;
+  document.getElementById('mic-btn').classList.add('mic-active');
+  recognition.start();
+};
+
+// 🔊 Enhanced Speaker output
+document.getElementById('speak-btn').onclick = () => {
+  const text = document.getElementById('response-container').textContent.trim();
+  if (!text || text === 'Loading...' || text === 'The AI response will appear here.') {
+    alert('No response to speak');
+    return;
+  }
+  speakText(text);
+};
+
+// Enhanced voice synthesis function
+function speakText(text, autoSpeak = false) {
+  if (!text || text === 'Loading...' || text === 'The AI response will appear here.') {
+    console.log('No text to speak or invalid text');
+    return;
+  }
+  
+  if (!synth) {
+    console.error('Speech synthesis not supported');
+    alert('Speech synthesis is not supported in this browser');
+    return;
+  }
+  
+  const lang = document.getElementById('lang-select').value;
+  console.log('Attempting to speak:', text.substring(0, 50) + '...', 'in language:', lang);
+  
+  const utterance = new SpeechSynthesisUtterance(text);
+  utterance.lang = lang;
+  
+  // Language-specific voice settings
+  const voiceSettings = getVoiceSettings(lang);
+  utterance.rate = voiceSettings.rate;
+  utterance.pitch = voiceSettings.pitch;
+  utterance.volume = voiceSettings.volume;
+  
+  // Try to get the best voice for the language
+  const voices = synth.getVoices();
+  console.log('Available voices:', voices.length);
+  
+  const preferredVoice = getBestVoiceForLanguage(voices, lang);
+  if (preferredVoice) {
+    utterance.voice = preferredVoice;
+    console.log('Using voice:', preferredVoice.name, 'for language:', lang);
+  } else {
+    console.log('Using default voice for language:', lang);
+  }
+  
+  utterance.onstart = () => {
+    document.getElementById('speak-btn').textContent = '⏸️';
+    document.getElementById('speak-btn').style.backgroundColor = '#e74c3c';
+    console.log(`Speaking started in ${lang}`);
+  };
+  
+  utterance.onend = () => {
+    document.getElementById('speak-btn').textContent = '🔊';
+    document.getElementById('speak-btn').style.backgroundColor = '#3498db';
+    console.log('Speaking ended');
+  };
+  
+  utterance.onerror = (event) => {
+    console.error('Speech synthesis error:', event.error);
+    document.getElementById('speak-btn').textContent = '🔊';
+    document.getElementById('speak-btn').style.backgroundColor = '#3498db';
+    
+    // Show user-friendly error message
+    const errorMessages = {
+      'not-allowed': 'Microphone access denied. Please allow microphone access.',
+      'no-speech': 'No speech detected. Please try again.',
+      'audio-capture': 'Audio capture failed. Please check your microphone.',
+      'network': 'Network error. Please check your internet connection.',
+      'synthesis-failed': 'Voice synthesis failed. Please try again.',
+      'synthesis-unavailable': 'Voice synthesis is not available.',
+      'language-not-supported': 'Language not supported for voice synthesis.',
+      'voice-not-found': 'Voice not found for selected language.',
+      'text-too-long': 'Text is too long for voice synthesis.',
+      'invalid-argument': 'Invalid argument for voice synthesis.'
+    };
+    
+    const errorMessage = errorMessages[event.error] || 'Voice synthesis error occurred.';
+    console.error('Voice error details:', errorMessage);
+    alert(`Voice Error: ${errorMessage}`);
+  };
+  
+  try {
+    synth.speak(utterance);
+    console.log('Speech synthesis started');
+  } catch (error) {
+    console.error('Failed to start speech synthesis:', error);
+    alert('Failed to start voice synthesis. Please try again.');
+  }
+}
+
+// Get voice settings for different languages
+function getVoiceSettings(lang) {
+  const settings = {
+    'en-IN': { rate: 0.9, pitch: 1.0, volume: 0.8 },
+    'te-IN': { rate: 0.8, pitch: 1.0, volume: 0.8 },
+    'ta-IN': { rate: 0.8, pitch: 1.0, volume: 0.8 },
+    'kn-IN': { rate: 0.8, pitch: 1.0, volume: 0.8 },
+    'ml-IN': { rate: 0.8, pitch: 1.0, volume: 0.8 },
+    'hi-IN': { rate: 0.8, pitch: 1.0, volume: 0.8 },
+    'mr-IN': { rate: 0.8, pitch: 1.0, volume: 0.8 }
+  };
+  
+  return settings[lang] || { rate: 0.9, pitch: 1.0, volume: 0.8 };
+}
+
+// Get the best voice for the selected language
+function getBestVoiceForLanguage(voices, lang) {
+  if (!voices || voices.length === 0) return null;
+  
+  // First try to find exact language match
+  let voice = voices.find(v => v.lang === lang);
+  if (voice) return voice;
+  
+  // Then try to find language family match (e.g., 'te' for 'te-IN')
+  const langCode = lang.split('-')[0];
+  voice = voices.find(v => v.lang.startsWith(langCode));
+  if (voice) return voice;
+  
+  // Finally, try to find any Indian voice
+  voice = voices.find(v => v.lang.includes('IN') || v.lang.includes('India'));
+  if (voice) return voice;
+  
+  return null;
+}
+
+// 🚀 Send query directly to Gemini API
+async function sendQuery() {
+  const query = document.getElementById('user-input').value.trim();
+  const box = document.getElementById('response-container');
+  
+  if (!query) { 
+    box.textContent = "Please enter a question."; 
+    return; 
+  }
+
+  // Validate API key
+  if (!apiKey || apiKey === "YOUR_GEMINI_API_KEY") {
+    box.textContent = "Error: API key not configured. Please check the code.";
+    return;
+  }
+
+  box.textContent = "Loading...";
+  box.classList.add("loading");
+
+  // Get selected language for response
+  const selectedLang = document.getElementById('lang-select').value;
+  const languageInstructions = getLanguageInstructions(selectedLang);
+  
+  const payload = {
+    contents: [{ parts: [{ text: query }] }],
+    systemInstruction: { 
+      parts: [{ 
+        text: `You are a helpful agricultural assistant. ${languageInstructions}. Provide detailed, comprehensive answers about farming, crops, soil, weather, pests, diseases, and agricultural practices. Give complete information with practical advice.` 
+      }] 
+    }
+  };
+
+  try {
+    const res = await fetch(apiUrl, {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify(payload)
+    });
+    
+    const result = await res.json();
+    
+    // Check for API errors
+    if (result.error) {
+      box.textContent = `API Error: ${result.error.message || 'Unknown error occurred'}`;
+      return;
+    }
+    
+    const text = result?.candidates?.[0]?.content?.parts?.[0]?.text;
+    const responseText = text || "No response text found.";
+    box.textContent = responseText;
+    
+    // Auto-speak response if enabled
+    const autoSpeakEnabled = document.getElementById('auto-speak').checked;
+    if (autoSpeakEnabled && responseText && responseText !== "No response text found.") {
+      // Small delay to ensure text is displayed before speaking
+      setTimeout(() => {
+        speakText(responseText, true);
+      }, 500);
+    }
+    
+  } catch (err) {
+    console.error('API Error:', err);
+    box.textContent = `Error: ${err.message || 'An error occurred. Please try again later.'}`;
+  } finally {
+    box.classList.remove("loading");
+  }
+}
+
+// Language instructions for AI responses
+function getLanguageInstructions(lang) {
+  const instructions = {
+    'en-IN': 'Respond in English (India) with clear, detailed agricultural advice suitable for Indian farmers.',
+    'te-IN': 'Respond in Telugu (తెలుగు) with complete agricultural information. Use simple, clear Telugu language that farmers can easily understand.',
+    'ta-IN': 'Respond in Tamil (தமிழ்) with comprehensive agricultural guidance. Use clear Tamil language appropriate for Tamil Nadu farmers.',
+    'kn-IN': 'Respond in Kannada (ಕನ್ನಡ) with detailed farming advice. Use simple Kannada language that Karnataka farmers can easily follow.',
+    'ml-IN': 'Respond in Malayalam (മലയാളം) with complete agricultural information. Use clear Malayalam language suitable for Kerala farmers.',
+    'hi-IN': 'Respond in Hindi (हिन्दी) with detailed agricultural advice. Use simple Hindi language that Indian farmers can easily understand.',
+    'mr-IN': 'Respond in Marathi (मराठी) with comprehensive farming guidance. Use clear Marathi language appropriate for Maharashtra farmers.'
+  };
+  
+  return instructions[lang] || 'Respond in English with detailed agricultural information.';
+}
+</script>
+</body>
+</html>
