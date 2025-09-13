@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Krishi Sahayak</title>
-    <link rel="icon" href="logo.png">
+    <link rel="icon" href="logo002.PNG">
     <link rel="stylesheet" href="new.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css" integrity="sha512-2SwdPD6INVrV/lHTZbO2nodKhrnDdJK9/kg2XD1r9uGqPo1cUbujc+IYdlYdEErWNu69gVcYgdxlmVmzTWnetw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
    <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -16,10 +16,307 @@
         <img src="logo002.PNG" alt="KRISHI SAHAYAK" id="mainlogo">
         <h1 id="title">KRISHI SAHAYAK</h1>
         <div id="navbuttons">
-            <i class="fa-solid fa-circle-user" id="userlogin"> </i>
+            <a href="newfaq.html"><i class="fa-regular fa-circle-question" id="userlogin"></i>FAQ's</a>
         </div>
     </div>
     <div class="main">
+        <div style="font-family: Arial, sans-serif; text-align: center; padding: 20px;">
+        <h1>Weather Forecast</h1>
+        
+        <div style="margin-bottom: 20px; display: flex; justify-content: center; align-items: center; gap: 10px; flex-wrap: wrap;">
+            <label for="lang-select" style="font-weight: bold;">Language:</label>
+            <select id="lang-select" style="padding: 10px; border-radius: 8px; border: 1px solid #ccc;">
+                <option value="en" selected>English</option>
+                <option value="hi">हिंदी</option>
+                <option value="te">తెలుగు</option>
+                <option value="ta">தமிழ்</option>
+                <option value="ml">മലയാളം</option>
+                <option value="kn">ಕನ್ನಡ</option>
+                <option value="mr">मराठी</option>
+            </select>
+            <input type="text" id="city-input" placeholder="Enter your city..." style="padding: 10px; border: 1px solid #ccc; border-radius: 8px;">
+            <button id="today-btn" onclick="getForecast('today')" style="padding: 10px 20px; border: none; border-radius: 8px; background-color: #4CAF50; color: white; cursor: pointer;">Today</button>
+            <button id="tomorrow-btn" onclick="getForecast('tomorrow')" style="padding: 10px 20px; border: none; border-radius: 8px; background-color: #2196F3; color: white; cursor: pointer;">Tomorrow</button>
+            <button id="five-day-btn" onclick="getForecast('5day')" style="padding: 10px 20px; border: none; border-radius: 8px; background-color: #f44336; color: white; cursor: pointer;">5-Day Forecast</button>
+        </div>
+
+        <div id="weather-display" style="border: 1px solid #ccc; padding: 20px; border-radius: 8px; max-width: 600px; margin: 0 auto; display: none;">
+            <h3 id="weather-location"></h3>
+            <div id="forecast-container" style="display: flex; flex-direction: column; gap: 15px; margin-top: 20px;"></div>
+        </div>
+        
+        <p id="status-message" style="color: red; margin-top: 20px;"></p>
+    </div>
+
+    <script>
+        // Constants for the OpenWeatherMap API
+        const OPENWEATHER_API_KEY = 'e5376347f8700e140fd1b6178680ef77'; 
+        const OPENWEATHER_GEO_API_URL = 'https://api.openweathermap.org/geo/1.0/direct';
+        const OPENWEATHER_FORECAST_API_URL = 'https://api.openweathermap.org/data/2.5/forecast';
+
+        const translations = {
+            en: {
+                placeholder: 'Enter your city...',
+                todayBtn: 'Today',
+                tomorrowBtn: 'Tomorrow',
+                fiveDayBtn: '5-Day Forecast',
+                enterCity: 'Please enter a city.',
+                checking: 'Checking weather for',
+                locationNotFound: 'Location not found.',
+                forecastNotAvailable: 'Forecast data not available.',
+                weatherIn: 'Weather in',
+                tomorrowNotAvailable: 'Tomorrow\'s forecast not available.',
+                temperature: 'Temperature',
+                conditions: 'Conditions',
+                humidity: 'Humidity',
+                windSpeed: 'Wind Speed',
+                apiError: 'Weather API Error: '
+            },
+            hi: {
+                placeholder: 'अपना शहर दर्ज करें...',
+                todayBtn: 'आज',
+                tomorrowBtn: 'कल',
+                fiveDayBtn: '5-दिन का पूर्वानुमान',
+                enterCity: 'कृपया एक शहर दर्ज करें।',
+                checking: 'मौसम की जाँच हो रही है',
+                locationNotFound: 'स्थान नहीं मिला।',
+                forecastNotAvailable: 'पूर्वानुमान डेटा उपलब्ध नहीं है।',
+                weatherIn: 'मौसम में',
+                tomorrowNotAvailable: 'कल का पूर्वानुमान उपलब्ध नहीं है।',
+                temperature: 'तापमान',
+                conditions: 'शर्तें',
+                humidity: 'नमी',
+                windSpeed: 'हवा की गति',
+                apiError: 'मौसम एपीआई त्रुटि: '
+            },
+            te: {
+                placeholder: 'మీ నగరాన్ని నమోదు చేయండి...',
+                todayBtn: 'ఈరోజు',
+                tomorrowBtn: 'రేపు',
+                fiveDayBtn: '5-రోజుల వాతావరణం',
+                enterCity: 'దయచేసి ఒక నగరాన్ని నమోదు చేయండి.',
+                checking: 'కోసం వాతావరణం తనిఖీ చేస్తోంది',
+                locationNotFound: 'స్థానం దొరకలేదు.',
+                forecastNotAvailable: 'వాతావరణం డేటా అందుబాటులో లేదు.',
+                weatherIn: 'లో వాతావరణం',
+                tomorrowNotAvailable: 'రేపటి వాతావరణం అందుబాటులో లేదు.',
+                temperature: 'ఉష్ణోగ్రత',
+                conditions: 'పరిస్థితులు',
+                humidity: 'తేమ',
+                windSpeed: 'గాలి వేగం',
+                apiError: 'వాతావరణ API లోపం: '
+            },
+            ta: {
+                placeholder: 'உங்கள் நகரத்தை உள்ளிடவும்...',
+                todayBtn: 'இன்று',
+                tomorrowBtn: 'நாளை',
+                fiveDayBtn: '5-நாள் முன்னறிவிப்பு',
+                enterCity: 'தயவுசெய்து ஒரு நகரத்தை உள்ளிடவும்.',
+                checking: 'வானிலை சரிபார்க்கப்படுகிறது',
+                locationNotFound: 'இடம் காணப்படவில்லை.',
+                forecastNotAvailable: 'முன்னறிவிப்பு தரவு கிடைக்கவில்லை.',
+                weatherIn: 'வானிலை',
+                tomorrowNotAvailable: 'நாளைக்கான முன்னறிவிப்பு கிடைக்கவில்லை.',
+                temperature: 'வெப்பநிலை',
+                conditions: 'நிபந்தனைகள்',
+                humidity: 'ஈரப்பதம்',
+                windSpeed: 'காற்று வேகம்',
+                apiError: 'வானிலை API பிழை: '
+            },
+            ml: {
+                placeholder: 'നിങ്ങളുടെ നഗരം നൽകുക...',
+                todayBtn: 'ഇന്ന്',
+                tomorrowBtn: 'നാളെ',
+                fiveDayBtn: '5-ദിവസത്തെ പ്രവചനം',
+                enterCity: 'ദയവായി ഒരു നഗരം നൽകുക.',
+                checking: 'വേണ്ടി കാലാവസ്ഥ പരിശോധിക്കുന്നു',
+                locationNotFound: 'സ്ഥലം കണ്ടെത്തിയില്ല.',
+                forecastNotAvailable: 'പ്രവചന ഡാറ്റ ലഭ്യമല്ല.',
+                weatherIn: 'ലെ കാലാവസ്ഥ',
+                tomorrowNotAvailable: 'നാളത്തെ പ്രവചനം ലഭ്യമല്ല.',
+                temperature: 'താപനില',
+                conditions: 'സാഹചര്യങ്ങൾ',
+                humidity: 'ഈർപ്പം',
+                windSpeed: 'കാറ്റിന്റെ വേഗത',
+                apiError: 'കാലാവസ്ഥ API പിശക്: '
+            },
+            kn: {
+                placeholder: 'ನಿಮ್ಮ ನಗರವನ್ನು ನಮೂದಿಸಿ...',
+                todayBtn: 'ಇಂದು',
+                tomorrowBtn: 'ನಾಳೆ',
+                fiveDayBtn: '5-ದಿನದ ಮುನ್ಸೂಚನೆ',
+                enterCity: 'ದಯವಿಟ್ಟು ಒಂದು ನಗರವನ್ನು ನಮೂದಿಸಿ.',
+                checking: 'ಹವಾಮಾನವನ್ನು ಪರಿಶೀಲಿಸಲಾಗುತ್ತಿದೆ',
+                locationNotFound: 'ಸ್ಥಳ ಕಂಡುಬಂದಿಲ್ಲ.',
+                forecastNotAvailable: 'ಮುನ್ಸೂಚನೆ ಡೇಟಾ ಲಭ್ಯವಿಲ್ಲ.',
+                weatherIn: 'ನಲ್ಲಿ ಹವಾಮಾನ',
+                tomorrowNotAvailable: 'ನಾಳೆ ಮುನ್ಸೂಚನೆ ಲಭ್ಯವಿಲ್ಲ.',
+                temperature: 'ತಾಪಮಾನ',
+                conditions: 'ಷರತ್ತುಗಳು',
+                humidity: 'ಆರ್ದ್ರತೆ',
+                windSpeed: 'ಗಾಳಿಯ ವೇಗ',
+                apiError: 'ಹವಾಮಾನ API ದೋಷ: '
+            },
+            mr: {
+                placeholder: 'तुमचे शहर प्रविष्ट करा...',
+                todayBtn: 'आज',
+                tomorrowBtn: 'उद्या',
+                fiveDayBtn: '5-दिवसांचा अंदाज',
+                enterCity: 'कृपया एक शहर प्रविष्ट करा.',
+                checking: 'साठी हवामान तपासत आहे',
+                locationNotFound: 'स्थान सापडले नाही.',
+                forecastNotAvailable: 'अंदाजाचे डेटा उपलब्ध नाही.',
+                weatherIn: 'मध्ये हवामान',
+                tomorrowNotAvailable: 'उद्याचा अंदाज उपलब्ध नाही.',
+                temperature: 'तापमान',
+                conditions: 'अटी',
+                humidity: 'आर्द्रता',
+                windSpeed: 'वाऱ्याचा वेग',
+                apiError: 'हवामान API त्रुटी: '
+            }
+        };
+
+        function getTranslation(key, lang) {
+            return translations[lang][key] || translations['en'][key];
+        }
+
+        async function getForecast(period) {
+            const cityInput = document.getElementById('city-input');
+            const location = cityInput.value.trim();
+            const statusMessage = document.getElementById('status-message');
+            const weatherDisplay = document.getElementById('weather-display');
+            const forecastContainer = document.getElementById('forecast-container');
+            const lang = document.getElementById('lang-select').value;
+            const t = key => getTranslation(key, lang);
+            
+            // Update button texts based on language
+            document.getElementById('today-btn').textContent = t('todayBtn');
+            document.getElementById('tomorrow-btn').textContent = t('tomorrowBtn');
+            document.getElementById('five-day-btn').textContent = t('fiveDayBtn');
+            cityInput.placeholder = t('placeholder');
+
+
+            if (!location) {
+                statusMessage.textContent = t('enterCity');
+                return;
+            }
+
+            statusMessage.textContent = `${t('checking')} ${location}...`;
+            weatherDisplay.style.display = 'none';
+            forecastContainer.innerHTML = ''; // Clear previous forecasts
+            document.getElementById('weather-location').textContent = '';
+
+            try {
+                // First, get the geographic coordinates for the city
+                const geoResponse = await fetch(`${OPENWEATHER_GEO_API_URL}?q=${location}&limit=1&appid=${OPENWEATHER_API_KEY}`);
+                const geoData = await geoResponse.json();
+
+                if (!geoData || geoData.length === 0) {
+                    throw new Error(t('locationNotFound'));
+                }
+
+                const { lat, lon } = geoData[0];
+
+                // Then, get the 5-day / 3-hour weather forecast with the specified language
+                const weatherResponse = await fetch(`${OPENWEATHER_FORECAST_API_URL}?lat=${lat}&lon=${lon}&appid=${OPENWEATHER_API_KEY}&units=metric&lang=${lang}`);
+                const weatherData = await weatherResponse.json();
+
+                if (weatherData.cod !== '200') {
+                    throw new Error(weatherData.message || t('forecastNotAvailable'));
+                }
+
+                document.getElementById('weather-location').textContent = `${t('weatherIn')} ${location}`;
+
+                const dailyForecasts = {};
+                weatherData.list.forEach(item => {
+                    const date = new Date(item.dt * 1000).toLocaleDateString(lang);
+                    if (!dailyForecasts[date]) {
+                        dailyForecasts[date] = {
+                            date: item.dt,
+                            temp: {
+                                max: item.main.temp_max,
+                                min: item.main.temp_min
+                            },
+                            weather: item.weather,
+                            humidity: item.main.humidity,
+                            wind_speed: item.wind.speed
+                        };
+                    } else {
+                        dailyForecasts[date].temp.max = Math.max(dailyForecasts[date].temp.max, item.main.temp_max);
+                        dailyForecasts[date].temp.min = Math.min(dailyForecasts[date].temp.min, item.main.temp_min);
+                    }
+                });
+
+                const dates = Object.keys(dailyForecasts).sort();
+
+                // Determine which forecast to display
+                if (period === 'today') {
+                    if (dates.length > 0) {
+                        displayDailyForecast(dailyForecasts[dates[0]], lang, t);
+                    }
+                } else if (period === 'tomorrow') {
+                    if (dates.length > 1) {
+                        displayDailyForecast(dailyForecasts[dates[1]], lang, t);
+                    } else {
+                        throw new Error(t('tomorrowNotAvailable'));
+                    }
+                } else if (period === '5day') {
+                    dates.forEach((dateKey, index) => {
+                        const dayData = dailyForecasts[dateKey];
+                        const dayLabel = index === 0 ? t('today') : new Date(dayData.date * 1000).toLocaleDateString(lang, { weekday: 'long', month: 'short', day: 'numeric' });
+                        displayDailyForecast(dayData, lang, t, dayLabel);
+                    });
+                }
+                
+                weatherDisplay.style.display = 'block';
+                statusMessage.textContent = '';
+
+            } catch (error) {
+                console.error('Weather API Error:', error);
+                statusMessage.textContent = `${t('apiError')} ${error.message}. Please try again later.`;
+                weatherDisplay.style.display = 'none';
+            }
+        }
+
+        function displayDailyForecast(dayData, lang, t, dateLabel = '') {
+            const forecastContainer = document.getElementById('forecast-container');
+            
+            const card = document.createElement('div');
+            card.style.cssText = `
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                border: 1px solid #ddd;
+                padding: 15px;
+                border-radius: 8px;
+                background-color: #f9f9f9;
+                width: 100%;
+                box-sizing: border-box;
+            `;
+
+            const date = dateLabel || new Date(dayData.date * 1000).toDateString();
+            card.innerHTML = `
+                <h4 style="margin: 0; padding: 0;">${date}</h4>
+                <img src="https://openweathermap.org/img/wn/${dayData.weather[0].icon}@2x.png" alt="Weather icon">
+                <p style="margin: 5px 0;">${t('temperature')}: <strong>${Math.round(dayData.temp.min)}°C - ${Math.round(dayData.temp.max)}°C</strong></p>
+                <p style="margin: 5px 0;">${t('conditions')}: ${dayData.weather[0].description}</p>
+                <p style="margin: 5px 0;">${t('humidity')}: ${dayData.humidity}%</p>
+                <p style="margin: 5px 0;">${t('windSpeed')}: ${dayData.wind_speed} m/s</p>
+            `;
+
+            forecastContainer.appendChild(card);
+        }
+
+        // Initialize button text on load
+        window.onload = function() {
+            const lang = document.getElementById('lang-select').value;
+            const t = key => getTranslation(key, lang);
+            document.getElementById('today-btn').textContent = t('todayBtn');
+            document.getElementById('tomorrow-btn').textContent = t('tomorrowBtn');
+            document.getElementById('five-day-btn').textContent = t('fiveDayBtn');
+            document.getElementById('city-input').placeholder = t('placeholder');
+        }
+    </script>
         <div class="container">
             <img src="logo002.PNG" alt="KRISHI SAHAYAK" id="contimg">
     <h1>KRISHI SAHAYAK</h1>
